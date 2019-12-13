@@ -25,6 +25,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/google/uuid"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -63,6 +64,8 @@ type GrpcProxyAgentOptions struct {
 	// Configuration for connecting to the proxy-server
 	proxyServerHost string
 	proxyServerPort int
+
+	agentID string
 }
 
 func (o *GrpcProxyAgentOptions) Flags() *pflag.FlagSet {
@@ -72,6 +75,7 @@ func (o *GrpcProxyAgentOptions) Flags() *pflag.FlagSet {
 	flags.StringVar(&o.caCert, "ca-cert", o.caCert, "If non-empty the CAs we use to validate clients.")
 	flags.StringVar(&o.proxyServerHost, "proxy-server-host", o.proxyServerHost, "The hostname to use to connect to the proxy-server.")
 	flags.IntVar(&o.proxyServerPort, "proxy-server-port", o.proxyServerPort, "The port the proxy server is listening on.")
+	flags.StringVar(&o.agentID, "agent-id", o.agentID, "The unique ID of this agent.")
 	return flags
 }
 
@@ -81,6 +85,7 @@ func (o *GrpcProxyAgentOptions) Print() {
 	klog.Warningf("CACert set to \"%s\".\n", o.caCert)
 	klog.Warningf("ProxyServerHost set to \"%s\".\n", o.proxyServerHost)
 	klog.Warningf("ProxyServerPort set to %d.\n", o.proxyServerPort)
+	klog.Warningf("agentID set to %s.\n", o.agentID)
 }
 
 func (o *GrpcProxyAgentOptions) Validate() error {
@@ -118,6 +123,7 @@ func newGrpcProxyAgentOptions() *GrpcProxyAgentOptions {
 		caCert:          "",
 		proxyServerHost: "127.0.0.1",
 		proxyServerPort: 8091,
+		agentID:         uuid.New().String(),
 	}
 	return &o
 }
@@ -178,14 +184,13 @@ func (a *Agent) runProxyConnection(o *GrpcProxyAgentOptions) error {
 		RootCAs:      certPool,
 	})
 	dialOption := grpc.WithTransportCredentials(transportCreds)
-	client, err := agentclient.NewAgentClient(fmt.Sprintf("%s:%d", o.proxyServerHost, o.proxyServerPort), dialOption)
+	cs := agentclient.NewAgentClientSet(fmt.Sprintf("%s:%d", o.proxyServerHost, o.proxyServerPort), o.agentID, dialOption)
+	err = cs.CreateClients()
 	if err != nil {
 		return err
 	}
 
-	stopCh := make(chan struct{})
-
-	go client.Serve(stopCh)
+	cs.Serve()
 
 	return nil
 }

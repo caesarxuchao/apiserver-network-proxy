@@ -33,12 +33,14 @@ type AgentClient struct {
 	nextConnID  int64
 	connContext map[int64]*connContext
 
-	stream *RedialableAgentClient
+	stream      *RedialableAgentClient
+	serverID    string // the proxy server this client connects to
+	serverCount int    // number of proxy servers, 1 if server is not HA.
+	stopCh      <-chan struct{}
 }
 
-// NewAgentClient creates an AgentClient
-func NewAgentClient(address string, opts ...grpc.DialOption) (*AgentClient, error) {
-	stream, err := NewRedialableAgentClient(address, opts...)
+func newAgentClient(address, agentID string, cs *ClientSet, opts ...grpc.DialOption) (*AgentClient, error) {
+	stream, err := NewRedialableAgentClient(address, agentID, cs, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -46,8 +48,16 @@ func NewAgentClient(address string, opts ...grpc.DialOption) (*AgentClient, erro
 	a := &AgentClient{
 		connContext: make(map[int64]*connContext),
 		stream:      stream,
+		serverID:    stream.serverID,
+		serverCount: stream.serverCount,
+		stopCh:      stream.stopCh,
 	}
 	return a, nil
+}
+
+// Close closes the underlying stream.
+func (c *AgentClient) Close() {
+	c.stream.Close()
 }
 
 // connContext tracks a connection from agent to node network.
@@ -75,10 +85,12 @@ func (c *connContext) cleanup() {
 // gRPC stream. Successful Connect is required before Serve. The
 // The requests include things like opening a connection to a server,
 // streaming data and close the connection.
-func (a *AgentClient) Serve(stopCh <-chan struct{}) {
+func (a *AgentClient) Serve() {
+	klog.Infof("Start serving for serverID %s", a.serverID)
+	go a.stream.probe()
 	for {
 		select {
-		case <-stopCh:
+		case <-a.stopCh:
 			klog.Info("stop agent client.")
 			return
 		default:

@@ -136,6 +136,40 @@ func (s *ProxyServer) randomBackend() (agent.AgentService_ConnectServer, error) 
 	return s.backends[agentID][0], nil
 }
 
+// func (s *ProxyServer) backend(connID int64) (agent.AgentService_ConnectServer, error) {
+// 	s.mu.Lock()
+// 	defer s.mu.Unlock()
+// 	agentID, ok := s.toAgentID(connID)
+// 	if !ok {
+// 		return nil, fmt.Errorf("cannot find corresponding agent for connection %d", connID)
+// 	}
+//
+// 	backends := s.Backends[agentID]
+// 	if len(backends) == 0 {
+// 		return nil, fmt.Errorf("cannot find corresponding agent for connection %d", connID)
+// 	}
+// 	return backends[0], nil
+// }
+//
+// func (s *ProxyServer) addConnID(agentID string, connID int64) {
+// 	s.mu2.Lock()
+// 	defer s.mu2.Unlock()
+// 	s.connIDToAgentID[connID] = agentID
+// }
+//
+// func (s *ProxyServer) removeConnID(agentID string, connID int64) {
+// 	s.mu2.Lock()
+// 	defer s.mu2.Unlock()
+// 	delete(s.connIDToAgentID, connID)
+// }
+//
+// func (s *ProxyServer) toAgentID(connID int64) (string, bool) {
+// 	s.mu2.Lock()
+// 	defer s.mu2.Unlock()
+// 	agentID, ok := s.connIDToAgentID[connID]
+// 	return agentID, ok
+// }
+
 // NewProxyServer creates a new ProxyServer instance
 func NewProxyServer(serverID string, serverCount int) *ProxyServer {
 	return &ProxyServer{
@@ -348,6 +382,7 @@ func (s *ProxyServer) serveRecvBackend(agentID string, stream agent.AgentService
 			resp := pkt.GetDialResponse()
 			firstConnID = resp.ConnectID
 			klog.Infof("<<< Received DIAL_RSP(rand=%d, id=%d)", resp.Random, resp.ConnectID)
+			// s.addConnID(agentID, firstConnID)
 
 			if client, ok := s.PendingDial[resp.Random]; !ok {
 				klog.Warning("<<< DialResp not recognized; dropped")
@@ -385,6 +420,7 @@ func (s *ProxyServer) serveRecvBackend(agentID string, stream agent.AgentService
 					klog.Infof("<<< CLOSE_RSP sent to frontend")
 				}
 			}
+			// s.removeConnID(agentID, resp.ConnectID)
 
 		default:
 			klog.Warningf("<<< Unrecognized packet %+v", pkt)

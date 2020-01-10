@@ -6,6 +6,8 @@ github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
+# github.com/google/uuid v1.1.1
+github.com/google/uuid
 # github.com/inconshreveable/mousetrap v1.0.0
 github.com/inconshreveable/mousetrap
 # github.com/matttproud/golang_protobuf_extensions v1.0.1
@@ -46,10 +48,11 @@ google.golang.org/genproto/googleapis/rpc/status
 # google.golang.org/grpc v1.18.0
 google.golang.org/grpc
 google.golang.org/grpc/credentials
+google.golang.org/grpc/connectivity
+google.golang.org/grpc/metadata
 google.golang.org/grpc/balancer
 google.golang.org/grpc/balancer/roundrobin
 google.golang.org/grpc/codes
-google.golang.org/grpc/connectivity
 google.golang.org/grpc/encoding
 google.golang.org/grpc/encoding/proto
 google.golang.org/grpc/grpclog
@@ -62,7 +65,6 @@ google.golang.org/grpc/internal/grpcrand
 google.golang.org/grpc/internal/grpcsync
 google.golang.org/grpc/internal/transport
 google.golang.org/grpc/keepalive
-google.golang.org/grpc/metadata
 google.golang.org/grpc/naming
 google.golang.org/grpc/peer
 google.golang.org/grpc/resolver

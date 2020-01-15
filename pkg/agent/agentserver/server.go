@@ -297,6 +297,7 @@ func agentID(stream agent.AgentService_ConnectServer) (string, error) {
 
 // Connect is for agent to connect to ProxyServer as next hop
 func (s *ProxyServer) Connect(stream agent.AgentService_ConnectServer) error {
+	fmt.Println("CHAO: server serving Connect!!!!")
 	agentID, err := agentID(stream)
 	if err != nil {
 		return err

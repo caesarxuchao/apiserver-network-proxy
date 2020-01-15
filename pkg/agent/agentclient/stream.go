@@ -344,6 +344,7 @@ func (c *RedialableAgentClient) tryConnect() (connectResult, error) {
 	ctx := metadata.AppendToOutgoingContext(context.Background(), header.AgentID, c.agentID)
 	stream, err := agent.NewAgentServiceClient(conn).Connect(ctx)
 	if err != nil {
+		fmt.Printf("CHAO: %v\n", err)
 		return connectResult{}, err
 	}
 	sid, err := serverID(stream)

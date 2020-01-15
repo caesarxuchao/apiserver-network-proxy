@@ -104,9 +104,11 @@ func (cs *ClientSet) sync() {
 			time.Sleep(sleep)
 		}
 		if cs.serverCount == 0 || cs.clientsCount() < cs.serverCount {
+			fmt.Println("CHAO: making new client")
 			c, err := cs.newAgentClient()
 			if err != nil {
 				klog.Error(err)
+				return
 				continue
 			}
 			if cs.serverCount == 0 {

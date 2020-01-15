@@ -1294,6 +1294,7 @@ func (cs *clientStream) writeRequestBody(body io.Reader, bodyCloser io.Closer) (
 		trls, err = cc.encodeTrailers(req)
 		cc.mu.Unlock()
 		if err != nil {
+			fmt.Println("CHAO: 6")
 			cc.writeStreamReset(cs.ID, ErrCodeInternal, err)
 			cc.forgetStreamID(cs.ID)
 			return err

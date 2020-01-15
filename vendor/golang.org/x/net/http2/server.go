@@ -1712,6 +1712,7 @@ func (st *stream) copyTrailersToHandlerRequest() {
 // onWriteTimeout is run on its own goroutine (from time.AfterFunc)
 // when the stream's WriteTimeout has fired.
 func (st *stream) onWriteTimeout() {
+	fmt.Println("CHAO: 5")
 	st.sc.writeFrameFromHandler(FrameWriteRequest{write: streamError(st.id, ErrCodeInternal)})
 }
 

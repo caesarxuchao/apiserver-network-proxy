@@ -120,6 +120,7 @@ type handlerPanicRST struct {
 }
 
 func (hp handlerPanicRST) writeFrame(ctx writeContext) error {
+	fmt.Println("CHAO: 7")
 	return ctx.Framer().WriteRSTStream(hp.StreamID, ErrCodeInternal)
 }
 

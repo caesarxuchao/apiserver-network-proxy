@@ -24,6 +24,7 @@ import (
 	"io"
 	"math"
 	"net"
+	"runtime/debug"
 	"strconv"
 	"strings"
 	"sync"
@@ -783,6 +784,8 @@ func (t *http2Client) Close() error {
 	}
 	// Call t.onClose before setting the state to closing to prevent the client
 	// from attempting to create new streams ASAP.
+	fmt.Println("onClose called")
+	debug.PrintStack()
 	t.onClose()
 	t.state = closing
 	streams := t.activeStreams
@@ -1248,6 +1251,7 @@ func (t *http2Client) reader() {
 	// Check the validity of server preface.
 	frame, err := t.framer.fr.ReadFrame()
 	if err != nil {
+		fmt.Printf("CHAO: reader close, %v\n", err)
 		t.Close() // this kicks off resetTransport, so must be last before return
 		return
 	}

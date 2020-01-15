@@ -27,7 +27,6 @@ import (
 	"math"
 	"net"
 	"net/http"
-	"runtime/debug"
 	"strconv"
 	"strings"
 	"time"
@@ -313,7 +312,7 @@ func (d *decodeState) decodeHeader(frame *http2.MetaHeadersFrame) error {
 	}
 
 	fmt.Println("CHAO: 21")
-	debug.PrintStack()
+	// debug.PrintStack()
 	return status.Error(code, d.constructHTTPErrMsg())
 }
 

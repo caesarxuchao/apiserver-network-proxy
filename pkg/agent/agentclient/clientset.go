@@ -111,6 +111,8 @@ func (cs *ClientSet) sync() {
 				return
 				continue
 			}
+			// TODO:
+			return
 			if cs.serverCount == 0 {
 				cs.serverCount = c.serverCount
 			}

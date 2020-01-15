@@ -25,6 +25,7 @@ import (
 	"math"
 	"net"
 	"reflect"
+	"runtime/debug"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -782,6 +783,7 @@ func (cc *ClientConn) incrCallsFailed() {
 // It does nothing if the ac is not IDLE.
 // TODO(bar) Move this to the addrConn section.
 func (ac *addrConn) connect() error {
+	debug.PrintStack()
 	ac.mu.Lock()
 	if ac.state == connectivity.Shutdown {
 		ac.mu.Unlock()
@@ -1080,7 +1082,8 @@ func (ac *addrConn) adjustParams(r transport.GoAwayReason) {
 }
 
 func (ac *addrConn) resetTransport() {
-	for i := 0; ; i++ {
+	// for i := 0; ; i++ {
+	for i := 0; i < 1; i++ {
 		if i > 0 {
 			ac.cc.resolveNow(resolver.ResolveNowOptions{})
 		}
@@ -1205,6 +1208,7 @@ func (ac *addrConn) tryAllAddrs(addrs []resolver.Address, connectDeadline time.T
 			})
 		}
 
+		fmt.Println("CHAO: addr=", addr)
 		newTr, reconnect, err := ac.createTransport(addr, copts, connectDeadline)
 		if err == nil {
 			return newTr, addr, reconnect, nil
@@ -1223,6 +1227,7 @@ func (ac *addrConn) tryAllAddrs(addrs []resolver.Address, connectDeadline time.T
 // Event in the successful case. The Event fires when the returned transport
 // disconnects.
 func (ac *addrConn) createTransport(addr resolver.Address, copts transport.ConnectOptions, connectDeadline time.Time) (transport.ClientTransport, *grpcsync.Event, error) {
+	fmt.Println("CHAO: createTransport")
 	prefaceReceived := make(chan struct{})
 	onCloseCalled := make(chan struct{})
 	reconnect := grpcsync.NewEvent()
@@ -1253,6 +1258,7 @@ func (ac *addrConn) createTransport(addr resolver.Address, copts transport.Conne
 			}
 		})
 		ac.mu.Unlock()
+		fmt.Println("CHAO: fired1")
 		reconnect.Fire()
 	}
 
@@ -1269,11 +1275,12 @@ func (ac *addrConn) createTransport(addr resolver.Address, copts transport.Conne
 		})
 		ac.mu.Unlock()
 		close(onCloseCalled)
+		fmt.Println("CHAO: fired2")
 		reconnect.Fire()
 	}
 
 	onPrefaceReceipt := func() {
-		close(prefaceReceived)
+		// close(prefaceReceived)
 	}
 
 	connectCtx, cancel := context.WithDeadline(ac.ctx, connectDeadline)
@@ -1288,14 +1295,17 @@ func (ac *addrConn) createTransport(addr resolver.Address, copts transport.Conne
 		grpclog.Warningf("grpc: addrConn.createTransport failed to connect to %v. Err :%v. Reconnecting...", addr, err)
 		return nil, nil, err
 	}
+	go close(prefaceReceived)
 
 	select {
 	case <-time.After(time.Until(connectDeadline)):
 		// We didn't get the preface in time.
+		fmt.Println("CHAO: didn't get the preface in time")
 		newTr.Close()
 		grpclog.Warningf("grpc: addrConn.createTransport failed to connect to %v: didn't receive server preface in time. Reconnecting...", addr)
 		return nil, nil, errors.New("timed out waiting for server handshake")
 	case <-prefaceReceived:
+		fmt.Println("CHAO: got the preface in time")
 		// We got the preface - huzzah! things are good.
 	case <-onCloseCalled:
 		// The transport has already closed - noop.

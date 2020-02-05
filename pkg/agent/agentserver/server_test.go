@@ -20,7 +20,7 @@ import (
 	"reflect"
 	"testing"
 
-	"sigs.k8s.io/apiserver-network-proxy/proto/agent"
+	"sigs.k8s.io/apiserver-network-proxy/konnectivity-client/proto/agent"
 )
 
 type fakeAgentService_ConnectServer struct {

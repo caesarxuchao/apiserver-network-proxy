@@ -18,7 +18,7 @@ require (
 	google.golang.org/grpc v1.27.0
 	honnef.co/go/tools v0.0.0-20190523083050-ea95bdfd59fc // indirect
 	k8s.io/klog v1.0.0
-	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.0.4
+	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.0.0
 )
 
 replace sigs.k8s.io/apiserver-network-proxy/konnectivity-client => ./konnectivity-client

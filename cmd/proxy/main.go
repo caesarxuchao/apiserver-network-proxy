@@ -39,7 +39,8 @@ import (
 	"google.golang.org/grpc/credentials"
 	"sigs.k8s.io/apiserver-network-proxy/pkg/agent/agentserver"
 	"sigs.k8s.io/apiserver-network-proxy/pkg/util"
-	"sigs.k8s.io/apiserver-network-proxy/konnectivity-client/proto/agent"
+	"sigs.k8s.io/apiserver-network-proxy/konnectivity-client/proto/client"
+	"sigs.k8s.io/apiserver-network-proxy/proto/agent"
 )
 
 func main() {
@@ -306,7 +307,7 @@ func (p *Proxy) runUDSMasterServer(ctx context.Context, o *ProxyRunOptions, serv
 	var stop StopFunc
 	if o.mode == "grpc" {
 		grpcServer := grpc.NewServer()
-		agent.RegisterProxyServiceServer(grpcServer, server)
+		client.RegisterProxyServiceServer(grpcServer, server)
 		var lc net.ListenConfig
 		lis, err := lc.Listen(ctx, "unix", o.udsName)
 		if err != nil {
@@ -383,7 +384,7 @@ func (p *Proxy) runMTLSMasterServer(ctx context.Context, o *ProxyRunOptions, ser
 	if o.mode == "grpc" {
 		serverOption := grpc.Creds(credentials.NewTLS(tlsConfig))
 		grpcServer := grpc.NewServer(serverOption)
-		agent.RegisterProxyServiceServer(grpcServer, server)
+		client.RegisterProxyServiceServer(grpcServer, server)
 		lis, err := net.Listen("tcp", addr)
 		if err != nil {
 			return nil, fmt.Errorf("failed to listen on %s: %v", addr, err)

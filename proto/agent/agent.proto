@@ -14,7 +14,9 @@
 
 syntax = "proto3";
 
-import "sigs.k8s.io/apiserver-network-proxy/konnectivity-client/proto/client/client.proto";
+option go_package = "sigs.k8s.io/apiserver-network-proxy/proto/agent";
+
+import "konnectivity-client/proto/client/client.proto";
 
 service AgentService {
   // Agent Identifier?

@@ -73,12 +73,12 @@ bin/proxy-server: proto/agent/agent.pb.go proto/client/client.pb.go bin cmd/prox
 gen: proto/agent/agent.pb.go proto/client/client.pb.go
 
 proto/client/client.pb.go: konnectivity-client/proto/client/client.proto
-	protoc -I . konnectivity-client/proto/client/client.proto --go_out=plugins=grpc:.
+	protoc -I . konnectivity-client/proto/client/client.proto --go_out=plugins=grpc:${GOPATH}/src
 	cat hack/go-license-header.txt konnectivity-client/proto/client/client.pb.go > konnectivity-client/proto/client/client.licensed.go
 	mv konnectivity-client/proto/client/client.licensed.go konnectivity-client/proto/client/client.pb.go
 
 proto/agent/agent.pb.go: proto/agent/agent.proto
-	protoc -I ${GOPATH}/src sigs.k8s.io/apiserver-network-proxy/proto/agent/agent.proto --go_out=plugins=grpc:${GOPATH}/src
+	protoc -I . proto/agent/agent.proto --go_out=plugins=grpc:${GOPATH}/src
 	cat hack/go-license-header.txt proto/agent/agent.pb.go > proto/agent/agent.licensed.go
 	mv proto/agent/agent.licensed.go proto/agent/agent.pb.go
 
